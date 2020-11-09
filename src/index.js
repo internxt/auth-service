@@ -1,6 +1,4 @@
-
-
-const LoginService = require('./services/login');
+const LoginService = require('./services/auth');
 const RegisterService = require('./services/new');
 
 
@@ -13,7 +11,7 @@ const Server = require('../config/initializers/server');
 
 
 /*
-    Server endpoints
+    SERVER ENDPOINTS
 */
 Server.get('/', (req, res) => {
     res.send("Hola");

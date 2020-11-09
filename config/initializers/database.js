@@ -18,8 +18,8 @@ const instance = new Sequelize(DbConfig.development.database, DbConfig.developme
     }
 });
 
-const User = UserModel(instance, Sequelize);
-console.log(User);
+const Users = UserModel(instance, Sequelize);
+console.log(Users);
 console.log("Model created");
 
 instance
