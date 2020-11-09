@@ -4,7 +4,7 @@ const async = require('async');
 const uuid = require('uuid');
 
 const { Users } = require("../../config/initializers/database");
-
+const CryptService = require("./crypt");
 
 
 const RegisterNewUser = (user) => {
@@ -14,8 +14,8 @@ const RegisterNewUser = (user) => {
     }
 
     // Decrypt password
-    //const userPass = App.services.Crypt.decryptText(user.password);
-    //const userSalt = App.services.Crypt.decryptText(user.salt);
+    const userPass = CryptService.decryptText(user.password);
+    const userSalt = CryptService.decryptText(user.salt);
 
     const t = Model.users.sequelize.transaction();
 
@@ -37,10 +37,10 @@ const RegisterNewUser = (user) => {
 const FindOrCreate = (user) => {
     // Create password hashed pass only when a pass is given
     const userPass = user.password
-      ? App.services.Crypt.decryptText(user.password)
+      ? CryptService.decryptText(user.password)
       : null;
     const userSalt = user.salt
-      ? App.services.Crypt.decryptText(user.salt)
+      ? CryptService.decryptText(user.salt)
       : null;
     
     // Throw error when user email. pass, salt or mnemonic is missing
@@ -68,11 +68,11 @@ const FindOrCreate = (user) => {
       .spread(async (userResult, created) => {
         if (created) {
           // Create bridge pass using email (because id is unconsistent)
-          const bcryptId = await App.services.Storj.IdToBcrypt(
+          const bcryptId = await CryptService.IdToBcrypt(
             userResult.email
           );
 
-          const bridgeUser = await App.services.Storj.RegisterBridgeUser(
+          const bridgeUser = await CryptService.RegisterBridgeUser(
             userResult.email,
             bcryptId
           );
@@ -121,6 +121,25 @@ const FindOrCreate = (user) => {
       })); // end transaction
 };
 
+
+const RegisterBridgeUser = (email, password) => {
+  // Set variables
+  const hashPwd = CryptService.pwdToHex(password);
+
+  // Set api call settings
+  const params = { headers: { 'Content-Type': 'application/json' } };
+  const data = {
+    email,
+    password: hashPwd
+  };
+
+  // Do api call
+  return axios
+    .post(`${App.config.get('STORJ_BRIDGE')}/users`, data, params)
+    .then((response) => response)
+    .catch((error) => error);
+};
+
 const Register = (userData) => new Promise ((resolve, reject) => {
     
     console.log("USER: ", userData);
@@ -148,6 +167,9 @@ const Register = (userData) => new Promise ((resolve, reject) => {
 
 
 module.exports = {
-    Register
+    Register,
+    RegisterNewUser,
+    FindOrCreate,
+    RegisterBridgeUser
 }
 
