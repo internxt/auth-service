@@ -2,6 +2,7 @@ const CryptoJS = require('crypto-js');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const AesUtil = require('../lib/AesUtil');
+const dotenv = require('dotenv').config();
 
 //const log = App.logger;
 
@@ -9,14 +10,14 @@ function probabilisticEncryption(content) {
     try {
       const b64 = CryptoJS.AES.encrypt(
         content,
-        process.env.CRYPTO_SECRET2
+        dotenv.parsed.CRYPTO_SECRET2
       ).toString();
       const e64 = CryptoJS.enc.Base64.parse(b64);
       const eHex = e64.toString(CryptoJS.enc.Hex);
 
       return eHex;
     } catch (error) {
-      log.error(`(probabilisticEncryption): ${error}`);
+      console.log(`(probabilisticEncryption): ${error}`);
 
       return null;
     }
@@ -25,13 +26,13 @@ function probabilisticEncryption(content) {
 function probabilisticDecryption(cipherText) {
     try {
       const reb64 = CryptoJS.enc.Hex.parse(cipherText);
-      const bytes = reb64.toString(CryptoJS.enc.Base64);
-      const decrypt = CryptoJS.AES.decrypt(bytes, process.env.CRYPTO_SECRET2);
-      const plain = decrypt.toString(CryptoJS.enc.Utf8);
-
+      const bytes = reb64.words.toString(CryptoJS.enc.Base64);
+      const decrypt = CryptoJS.AES.decrypt(bytes, dotenv.parsed.CRYPTO_SECRET2);   
+      const plain = decrypt.words.toString(CryptoJS.enc.Utf8);
+      
       return plain;
     } catch (error) {
-      log.error(`(probabilisticDecryption): ${error}`);
+      console.log(`(probabilisticDecryption): ${error}`);
 
       return null;
     }
@@ -39,14 +40,18 @@ function probabilisticDecryption(cipherText) {
 
 function deterministicEncryption(content, salt) {
     try {
+      
       const key = CryptoJS.enc.Hex.parse(
-        process.env.CRYPTO_SECRET2
+        dotenv.parsed.CRYPTO_SECRET2
       );
+      
       const iv = salt ? CryptoJS.enc.Hex.parse(salt.toString()) : key;
 
       const encrypt = CryptoJS.AES.encrypt(content, key, { iv }).toString();
       const b64 = CryptoJS.enc.Base64.parse(encrypt);
       const eHex = b64.toString(CryptoJS.enc.Hex);
+
+      
 
       return eHex;
     } catch (e) {
@@ -57,7 +62,7 @@ function deterministicEncryption(content, salt) {
 function deterministicDecryption(cipherText, salt) {
     try {
       const key = CryptoJS.enc.Hex.parse(
-        process.env.CRYPTO_SECRET2
+        dotenv.parsed.CRYPTO_SECRET2
       );
       const iv = salt ? CryptoJS.enc.Hex.parse(salt.toString()) : key;
 
@@ -92,8 +97,10 @@ function decryptName(cipherText, salt) {
         console.log('ERROR', e.message);
       }
     }
+    
 
     if (!salt) {
+      console.log(cipherText);
       // If no salt, something is trying to use legacy decryption
       return probabilisticDecryption(cipherText);
     }
@@ -151,7 +158,7 @@ function pwdToHex(pwd) {
   try {
     return crypto.createHash('sha256').update(pwd).digest('hex');
   } catch (error) {
-    log.error('[CRYPTO sha256] ', error);
+    console.log('[CRYPTO sha256] ', error);
 
     return null;
   }
@@ -161,7 +168,7 @@ function IdToBcrypt(id) {
   try {
     return bcrypt.hashSync(id.toString(), 8);
   } catch (error) {
-    log.error('[BCRYPTJS]', error);
+    console.log('[BCRYPTJS]', error);
 
     return null;
   }

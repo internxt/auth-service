@@ -1,23 +1,29 @@
 const Sequelize = require('sequelize');
 const jwt = require('jsonwebtoken');
-const passport = require('passport');
+const Passport = require('passport');
+const JwtStrategy = require('passport-jwt').Strategy;
+const { ExtractJwt } = require('passport-jwt');
+const dotenv = require('dotenv').config();
 
 const { Users } = require("../../config/initializers/database");
 const CryptService = require("./crypt");
+const UserService = require("./common");
 
-const passportAuth = passport.authenticate('jwt', { session: false });
+const passportAuth = Passport.authenticate('jwt', { session: false });
 
 
+/*
+    JWT methods
+*/
 function Sign(data, secret, useNewToken = false) {
     const token = useNewToken
-      ? jwt.sign({ email: data }, secret, { expiresIn: '14d' })
+      ? jwt.sign({ email: data.email, mnemonic: data.mnemonic }, secret, { expiresIn: '14d' })
       : jwt.sign(data, secret);
   
     return token;
 }
-
   
-  // eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
 function Verify(token, secret) {
     throw Error('Not implemented yet');
 }
@@ -38,6 +44,7 @@ const LoginFailed = (user, loginFailed) => new Promise((resolve, reject) => {
 });
 
 module.exports = {
+    passportAuth,
     Sign,
     Verify,
     LoginFailed
