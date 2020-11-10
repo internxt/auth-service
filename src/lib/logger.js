@@ -1,6 +1,7 @@
 const Winston = require('winston');
+const Config = require('../../config/environments/development');
 
-const Logger = (Config) => {
+const Logger = () => {
   return Winston.createLogger({
     level: Config.level || 0,
     format: Winston.format.combine(

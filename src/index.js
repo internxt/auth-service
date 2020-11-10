@@ -10,12 +10,14 @@ const UserService = require('./services/common');
 const CryptService = require('./services/crypt');
 const BridgeService = require('./services/bridge');
 const { passportAuth } = require('./services/auth');
+const Log = require('./lib/logger');
+
 
 /*
     Starts auth server
 */
 const Server = require('../config/initializers/server');
-
+const Logger = Log();
 
 
 /*
@@ -43,21 +45,21 @@ Server.post('/accounts/register', async (req, res) => {
     // Data validation for process only request with all data
     if (req.body.email && req.body.password) {
       req.body.email = req.body.email.toLowerCase().trim();
-      /*Logger.warn(
+      Logger.warn(
         'Register request for %s from %s',
         req.body.email,
         req.headers['X-Forwarded-For']
-      );*/
-
+      );
+        
       const newUser = req.body;
       newUser.credit = 0;
       const { referral } = req.body;
 
       if (uuid.validate(referral)) {
-        await Service.User.FindUserByUuid(referral).then((userData) => {
+        await UserService.FindUserByUuid(referral).then((userData) => {
           if (userData === null) {
             // Don't exists referral user
-            console.log('No existe la uuid de referencia');
+            console.log("Referrral UUID doesn't exists");
           } else {
             newUser.credit = 5;
             //Service.User.UpdateCredit(referral);
@@ -76,7 +78,6 @@ Server.post('/accounts/register', async (req, res) => {
       // Call user service to find or create user
       RegisterService.FindOrCreate(newUser)
         .then((userData) => {
-          console.log(userData)
           // Process user data and answer API call
           if (userData.isCreated) {
             const agent = useragent.parse(req.headers['user-agent']);
@@ -107,7 +108,7 @@ Server.post('/accounts/register', async (req, res) => {
             res.status(400).send({ message: 'This account already exists' });
           }
         }).catch((err) => {
-          //Logger.error(`${err.message}\n${err.stack}`);
+          Logger.error(`${err.message}\n${err.stack}`);
           res.status(500).send({ message: err.message });
         });
     } else {
@@ -158,14 +159,14 @@ Server.post('/accounts/login', (req, res) => {
           res.status(200).send({ sKey: encSalt, tfa: required2FA });
         }
       }).catch((err) => {
-        console.error(err);
+        Logger.error(err);
         res.status(400).send({
           error: 'User not found on Bridge database',
           message: err.response ? err.response.data : err,
         });
       });
     }).catch((err) => {
-      //Logger.error(`${err}: ${req.body.email}`);
+      Logger.error(`${err}: ${req.body.email}`);
       res.status(400).send({
         error: 'User not found on Cloud database',
         message: err.message,
@@ -343,7 +344,7 @@ Server.get('/accounts/tfa', passportAuth, (req, res) => {
           });
         })
         .catch((err) => {
-          console.error(err);
+          Logger.error(err);
           res.status(500).send({ error: 'Server error' });
         });
     }
@@ -436,7 +437,7 @@ Server.put('/accounts/mnemonic', passportAuth, (req, res) => {
           message: 'Successfully updated user with mnemonic'
         });
       }).catch(({ message }) => {
-        //Logger.error(message);
+        Logger.error(message);
         res.status(400).json({ message, code: 400 });
     });
 });

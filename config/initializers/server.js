@@ -2,15 +2,19 @@ const express = require('express');
 const dotenv = require('dotenv').config();
 const json = require('body-parser');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const Passport = require('passport');
 const JwtStrategy = require('passport-jwt').Strategy;
 const { ExtractJwt } = require('passport-jwt');
+
 const UserService = require("../../src/services/common");
+const Log = require('../../src/lib/logger');
+const Logger = Log();
 
 const Server = express();
 
 /*
-    Server Middlewares
+    Middlewares
 */
 Server.use(json.json());
 
@@ -26,13 +30,37 @@ Server.use(
 );
 
 /**
+   * Logger middleware.
+   * Prints in console the used endpoints in real time.
+*/
+Server.use(function (req, res, next) {
+    let user = null;
+    if (req.headers.authorization) {
+      try {
+        const x = jwt.decode(req.headers.authorization.split(" ")[1])
+        if (x.email) {
+          user = x.email
+        } else {
+          user = x
+        }
+      } catch (e) {
+
+      }
+    }
+    Logger.info(
+      `[${req.method}${req.headers.authorization ? ' w/AUTH' : ''}] ${req.originalUrl} ${user ? '\t' + user : ''}`,
+    );
+    next();
+});
+
+/**
    * JWT configuration.
    * Defines user authorization source (header / bearer token),
    * and the password to verify the JWT
    */
-  const passportOpts = {
+const passportOpts = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKey: dotenv.parsed.JWT_SECRET,
+    secretOrKey: dotenv.parsed.JWT_SECRET
 };
 
 /**
@@ -66,9 +94,10 @@ Passport.use(
     }),
 );
 
+//Server.use(Log);
 
 
 Server.listen(8000);
-console.log("Server started at port 8000")
+Logger.info("Auth server started");
 
 module.exports = Server

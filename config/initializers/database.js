@@ -4,13 +4,15 @@ const dotenv = require('dotenv').config();
 
 const UserModel = require('../../src/models/user');
 const DbConfig = require("../config.json");
+const Log = require('../../src/lib/logger');
+const Logger = Log();
 
 
 const instance = new Sequelize(dotenv.parsed.RDS_DBNAME, dotenv.parsed.RDS_USERNAME, dotenv.parsed.RDS_PASSWORD, {
     host: dotenv.parsed.RDS_HOSTNAME,
     dialect: 'mysql',
     operatorsAliases: 0,
-    logging: console.log,
+    logging: Logger.sql,
     pool: {
       max: 20,
       min: 0,
@@ -20,12 +22,11 @@ const instance = new Sequelize(dotenv.parsed.RDS_DBNAME, dotenv.parsed.RDS_USERN
 });
 
 const Users = UserModel(instance, Sequelize);
-console.log(Users);
-console.log("Model created");
+Logger.info("User model created");
 
 instance
     .authenticate()
-    .then(() => console.log('Connected to auth database'))
+    .then(() => Logger.info('Connected to auth database'))
     .catch((err) => console.log(err));
 
 module.exports = {

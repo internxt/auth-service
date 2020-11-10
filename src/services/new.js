@@ -5,6 +5,8 @@ const uuid = require('uuid');
 
 const { Users } = require("../../config/initializers/database");
 const CryptService = require("./crypt");
+const Log = require('../lib/logger');
+const Logger = Log();
 
 
 const RegisterNewUser = (user) => {
@@ -88,14 +90,14 @@ const FindOrCreate = (user) => {
           if (!bridgeUser.data) {
             throw new Error('Error creating bridge user');
           }
-
-          log.info(
+          */
+          Logger.info(
             'User Service | created brigde user: %s with uuid: %s',
             userResult.email,
             userResult.uuid
           );
+          //const freeTier = bridgeUser.data ? bridgeUser.data.isFreeTier : 1;
 
-          const freeTier = bridgeUser.data ? bridgeUser.data.isFreeTier : 1;*/
           // Store bcryptid on user register
           await userResult.update(
             { userId: bcryptId, isFreeTier: 1 },
@@ -112,9 +114,9 @@ const FindOrCreate = (user) => {
       .catch((err) => {
         if (err.response) {
           // This happens when email is registered in bridge
-          log.error(err.response.data);
+          Logger.error(err.response.data);
         } else {
-          log.error(err.stack);
+          Logger.error(err.stack);
         }
 
         throw new Error(err);

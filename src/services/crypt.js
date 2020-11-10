@@ -1,10 +1,12 @@
 const CryptoJS = require('crypto-js');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
-const AesUtil = require('../lib/AesUtil');
+const AesUtil = require('../lib/AesUtil');;
 const dotenv = require('dotenv').config();
+const Log = require('../lib/logger');
+const { lookup } = require('dns');
+const Logger = Log();
 
-//const log = App.logger;
 
 function probabilisticEncryption(content) {
     try {
@@ -17,7 +19,7 @@ function probabilisticEncryption(content) {
 
       return eHex;
     } catch (error) {
-      console.log(`(probabilisticEncryption): ${error}`);
+      Logger.error(`(probabilisticEncryption): ${error}`);
 
       return null;
     }
@@ -32,7 +34,7 @@ function probabilisticDecryption(cipherText) {
       
       return plain;
     } catch (error) {
-      console.log(`(probabilisticDecryption): ${error}`);
+      Logger.error(`(probabilisticDecryption): ${error}`);
 
       return null;
     }
@@ -158,7 +160,7 @@ function pwdToHex(pwd) {
   try {
     return crypto.createHash('sha256').update(pwd).digest('hex');
   } catch (error) {
-    console.log('[CRYPTO sha256] ', error);
+    Logger.error('[CRYPTO sha256] ', error);
 
     return null;
   }

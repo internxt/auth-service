@@ -4,6 +4,8 @@ const crypto = require('crypto-js');
 
 const { Users } = require("../../config/initializers/database");
 const CryptService = require("./crypt");
+const Log = require('../lib/logger');
+const Logger = Log();
 
 
 
@@ -14,7 +16,6 @@ const FindUserByEmail = (email) => {
     return new Promise((resolve, reject) => {
         Users.findOne({ where: { email: { [Op.eq]: email } }}).then((userData) => {
           if (userData) {
-            console.log(userData)
             const user = userData.dataValues;
             if (user.mnemonic) user.mnemonic = user.mnemonic.toString();
 
@@ -141,7 +142,7 @@ const UpdatePasswordMnemonic = (
               resolve();
             })
             .catch((err) => {
-              console.log('error updating', err);
+              Logger.error('error updating', err);
               reject({ error: 'Error updating info' });
             });
         }
