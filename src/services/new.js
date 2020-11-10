@@ -42,7 +42,7 @@ const FindOrCreate = (user) => {
     const userSalt = user.salt
       ? CryptService.decryptText(user.salt)
       : null;
-    
+
     // Throw error when user email. pass, salt or mnemonic is missing
     if (!user.email || !userPass || !userSalt || !user.mnemonic) {
       throw new Error('Wrong user registration data');
@@ -72,7 +72,7 @@ const FindOrCreate = (user) => {
             userResult.email
           );
 
-          const bridgeUser = await CryptService.RegisterBridgeUser(
+          /*const bridgeUser = await CryptService.RegisterBridgeUser(
             userResult.email,
             bcryptId
           );
@@ -95,10 +95,10 @@ const FindOrCreate = (user) => {
             userResult.uuid
           );
 
-          const freeTier = bridgeUser.data ? bridgeUser.data.isFreeTier : 1;
+          const freeTier = bridgeUser.data ? bridgeUser.data.isFreeTier : 1;*/
           // Store bcryptid on user register
           await userResult.update(
-            { userId: bcryptId, isFreeTier: freeTier },
+            { userId: bcryptId, isFreeTier: 1 },
             { transaction: t }
           );
 
@@ -122,54 +122,8 @@ const FindOrCreate = (user) => {
 };
 
 
-const RegisterBridgeUser = (email, password) => {
-  // Set variables
-  const hashPwd = CryptService.pwdToHex(password);
-
-  // Set api call settings
-  const params = { headers: { 'Content-Type': 'application/json' } };
-  const data = {
-    email,
-    password: hashPwd
-  };
-
-  // Do api call
-  return axios
-    .post(`${App.config.get('STORJ_BRIDGE')}/users`, data, params)
-    .then((response) => response)
-    .catch((error) => error);
-};
-
-const Register = (userData) => new Promise ((resolve, reject) => {
-    
-    console.log("USER: ", userData);
-    User.create({
-        uuid: userData.uuid,
-        userId: userData.userId,
-        name: userData.name,
-        lastname: userData.lastname,
-        email: userData.email,
-        password: userData.password,
-        mnemonic: userData.mnemonic,
-        hKey: userData.hKey,
-        secret_2FA: userData.secret_2FA,
-        errorLoginCount: userData.errorLoginCount,
-        referral: userData.referral
-        
-    }).then((user) => {
-        console.log("NEW USER", user);
-        resolve(user);
-    }).catch((err) => {
-        console.log("EN ERROR");
-        reject(err);
-    });
-});
-
-
 module.exports = {
-    Register,
     RegisterNewUser,
-    FindOrCreate,
-    RegisterBridgeUser
+    FindOrCreate
 }
 

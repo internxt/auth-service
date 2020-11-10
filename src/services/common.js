@@ -11,11 +11,10 @@ const FindUserByUuid = (uuid) => Model.users.findOne({ where: { uuid: { [Op.eq]:
 
 
 const FindUserByEmail = (email) => {
-    console.log('email', email); // debug
-
     return new Promise((resolve, reject) => {
         Users.findOne({ where: { email: { [Op.eq]: email } }}).then((userData) => {
           if (userData) {
+            console.log(userData)
             const user = userData.dataValues;
             if (user.mnemonic) user.mnemonic = user.mnemonic.toString();
 
@@ -27,6 +26,10 @@ const FindUserByEmail = (email) => {
         .catch((err) => reject(err));
     });
 };
+
+const FindUserObjByEmail = (email) => {
+    return Model.users.findOne({ where: { email: { [Op.eq]: email } } });
+}
 
 
 const UpdateMnemonic = async (userEmail, mnemonic) => {
@@ -156,6 +159,7 @@ const UpdatePasswordMnemonic = (
 module.exports = {
     FindUserByUuid,
     FindUserByEmail,
+    FindUserObjByEmail,
     UpdateMnemonic,
     Store2FA,
     Delete2FA,
