@@ -4,7 +4,6 @@ const crypto = require('crypto');
 const AesUtil = require('../lib/AesUtil');;
 const dotenv = require('dotenv').config();
 const Log = require('../lib/logger');
-const { lookup } = require('dns');
 const Logger = Log();
 
 

@@ -17,8 +17,18 @@ const passportAuth = Passport.authenticate('jwt', { session: false });
 */
 function Sign(data, secret, useNewToken = false) {
     const token = useNewToken
-      ? jwt.sign({ email: data.email, mnemonic: data.mnemonic }, secret, { expiresIn: '14d' })
-      : jwt.sign(data, secret);
+      ? jwt.sign(
+        {
+          email: data.email,
+          mnemonic: data.mnemonic
+        },
+        secret,
+        { expiresIn: '14d' })
+      : jwt.sign(
+        {
+          email: data.email,
+          mnemonic: data.mnemonic
+        }, secret);
   
     return token;
 }
@@ -30,17 +40,16 @@ function Verify(token, secret) {
 
 
 const LoginFailed = (user, loginFailed) => new Promise((resolve, reject) => {
-    Model.users
-      .update(
-        {
-          errorLoginCount: loginFailed
-            ? sequelize.literal('error_login_count + 1')
-            : 0
-        },
-        { where: { email: user } }
-      )
-      .then((res) => resolve())
-      .catch(reject);
+  Users.update(
+    {
+      errorLoginCount: loginFailed
+      ? sequelize.literal('error_login_count + 1')
+      : 0
+    },
+    { where: { email: user } }
+  )
+  .then((res) => resolve())
+  .catch(reject);
 });
 
 module.exports = {

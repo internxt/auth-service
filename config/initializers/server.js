@@ -94,8 +94,6 @@ Passport.use(
     }),
 );
 
-//Server.use(Log);
-
 
 Server.listen(8000);
 Logger.info("Auth server started");
