@@ -1,10 +1,12 @@
 const Sequelize = require('sequelize');
 const { Op } = Sequelize;
-const async = require('async');
 const uuid = require('uuid');
+const dotenv = require('dotenv').config();
+const STORJ_BRIDGE = dotenv.parsed.STORJ_BRIDGE;
 
-const { Users } = require("../../config/initializers/database");
-const CryptService = require("./crypt");
+const { Users } = require('../../config/initializers/database');
+const CryptService = require('./crypt');
+const BridgeService = require('./bridge')
 const Log = require('../lib/logger');
 const Logger = Log();
 
@@ -74,7 +76,7 @@ const FindOrCreate = (user) => {
             userResult.email
           );
 
-          /*const bridgeUser = await CryptService.RegisterBridgeUser(
+          const bridgeUser = await BridgeService.RegisterBridgeUser(
             userResult.email,
             bcryptId
           );
@@ -90,14 +92,14 @@ const FindOrCreate = (user) => {
           if (!bridgeUser.data) {
             throw new Error('Error creating bridge user');
           }
-          */
+          
           Logger.info(
             'User Service | created brigde user: %s with uuid: %s',
             userResult.email,
             userResult.uuid
           );
           //const freeTier = bridgeUser.data ? bridgeUser.data.isFreeTier : 1;
-
+            
           // Store bcryptid on user register
           await userResult.update(
             { userId: bcryptId, isFreeTier: 1 },

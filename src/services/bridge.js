@@ -1,5 +1,7 @@
-
-
+const axios = require('axios');
+const CryptService = require('./crypt');
+const dotenv = require('dotenv').config();
+const STORJ_BRIDGE = dotenv.parsed.STORJ_BRIDGE;
 
 const RegisterBridgeUser = (email, password) => {
     // Set variables
@@ -14,7 +16,7 @@ const RegisterBridgeUser = (email, password) => {
   
     // Do api call
     return axios
-      .post(`${App.config.get('STORJ_BRIDGE')}/users`, data, params)
+      .post(`${STORJ_BRIDGE}/users`, data, params)
       .then((response) => response)
       .catch((error) => error);
 };
@@ -25,7 +27,7 @@ const IsUserActivated = (email) => {
 
     // Do api call
     return axios.get(
-      `${App.config.get('STORJ_BRIDGE')}/users/isactivated`,
+      `${STORJ_BRIDGE}/users/isactivated`,
       params
     );
   };
