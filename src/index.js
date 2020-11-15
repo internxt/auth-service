@@ -145,6 +145,7 @@ Server.post('/login', (req, res) => {
         const encSalt = CryptService.encryptText(
           userData.hKey.toString()
         );
+        
         const required2FA = userData.secret_2FA && userData.secret_2FA.length > 0;
         res.status(200).send({ sKey: encSalt, tfa: required2FA });
       }

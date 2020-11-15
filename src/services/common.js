@@ -117,8 +117,6 @@ const UpdatePasswordMnemonic = (
   mnemonic
 ) => new Promise((resolve, reject) => {
   FindUserByEmail(userEmail).then((userData) => {
-      console.log('Found on database'); //debug
-
       const storedPassword = userData.password.toString();
 
       if (storedPassword !== currentPassword) {

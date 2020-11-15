@@ -11,7 +11,7 @@ function probabilisticEncryption(content) {
     try {
       const b64 = CryptoJS.AES.encrypt(
         content,
-        dotenv.parsed.CRYPTO_SECRET2
+        dotenv.parsed.CRYPTO_SECRET
       ).toString();
       const e64 = CryptoJS.enc.Base64.parse(b64);
       const eHex = e64.toString(CryptoJS.enc.Hex);
@@ -28,7 +28,7 @@ function probabilisticDecryption(cipherText) {
     try {
       const reb64 = CryptoJS.enc.Hex.parse(cipherText);
       const bytes = reb64.words.toString(CryptoJS.enc.Base64);
-      const decrypt = CryptoJS.AES.decrypt(bytes, dotenv.parsed.CRYPTO_SECRET2);   
+      const decrypt = CryptoJS.AES.decrypt(bytes, dotenv.parsed.CRYPTO_SECRET);   
       const plain = decrypt.words.toString(CryptoJS.enc.Utf8);
       
       return plain;
@@ -43,7 +43,7 @@ function deterministicEncryption(content, salt) {
     try {
       
       const key = CryptoJS.enc.Hex.parse(
-        dotenv.parsed.CRYPTO_SECRET2
+        dotenv.parsed.CRYPTO_SECRET
       );
       
       const iv = salt ? CryptoJS.enc.Hex.parse(salt.toString()) : key;
@@ -63,7 +63,7 @@ function deterministicEncryption(content, salt) {
 function deterministicDecryption(cipherText, salt) {
     try {
       const key = CryptoJS.enc.Hex.parse(
-        dotenv.parsed.CRYPTO_SECRET2
+        dotenv.parsed.CRYPTO_SECRET
       );
       const iv = salt ? CryptoJS.enc.Hex.parse(salt.toString()) : key;
 
@@ -81,7 +81,7 @@ function deterministicDecryption(cipherText, salt) {
 function encryptName(name, salt) {
     if (salt) {
       const encryptedResult = AesUtil.encrypt(name, salt, !salt);
-
+    
       return encryptedResult;
     }
 

@@ -21,10 +21,11 @@
 
 // load the build-in crypto functions
 const _crypto = require('crypto');
+const dotenv = require('dotenv').config();
 
 // load env variables for deterministic encrypt/decrypt
-const { MAGIC_IV, MAGIC_SALT } = process.env;
-const CRYPTO_KEY = process.env.CRYPTO_SECRET2;
+const { MAGIC_IV, MAGIC_SALT } = dotenv.parsed;
+const CRYPTO_KEY = dotenv.parsed.CRYPTO_SECRET2;
 
 
 module.exports = {
