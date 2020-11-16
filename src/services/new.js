@@ -47,6 +47,9 @@ const FindOrCreate = (user) => {
       ? CryptService.decryptText(user.salt)
       : null;
 
+      console.log('USER PASS ANTES', user.password)
+      console.log('USER PASS', userPass)
+
     // Throw error when user email. pass, salt or mnemonic is missing
     if (!user.email || !userPass || !userSalt || !user.mnemonic) {
       throw new Error('Wrong user registration data');
@@ -56,7 +59,7 @@ const FindOrCreate = (user) => {
       .findOrCreate({
         where: { email: user.email },
         defaults: {
-          uuid: uuid.v4(),
+          uuid: null,
           name: user.name,
           lastname: user.lastname,
           email: user.email,
@@ -94,16 +97,18 @@ const FindOrCreate = (user) => {
           }
           
           Logger.info(
-            'User Service | created brigde user: %s with uuid: %s',
+            'User Service | created brigde user: %s',
             userResult.email,
             userResult.uuid
           );
-          //const freeTier = bridgeUser.data ? bridgeUser.data.isFreeTier : 1;
+          const freeTier = bridgeUser.data ? bridgeUser.data.isFreeTier : 1;
             
           // Store bcryptid on user register
           await userResult.update(
-            { userId: bcryptId, isFreeTier: 1 },
-            { transaction: t }
+            { userId: bcryptId, 
+              isFreeTier: freeTier,
+              uuid: bridgeUser.data.uuid
+            }, { transaction: t }
           );
 
           // Set created flag for Frontend management
@@ -111,6 +116,7 @@ const FindOrCreate = (user) => {
         }
 
         // TODO: proveriti userId kao pass
+        console.log(userResult)
         return userResult;
       })
       .catch((err) => {

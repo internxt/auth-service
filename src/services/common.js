@@ -152,6 +152,19 @@ const UpdatePasswordMnemonic = (
 });
 
 
+const UpdateAccountActivity = (user) => new Promise((resolve, reject) => {
+  Users
+    .update({ updated_at: new Date() }, { where: { email: user } })
+    .then((res) => {
+      resolve();
+    })
+    .catch(reject);
+});
+
+const ActivateUser = (token) => {
+  return axios.get(`${App.config.get('STORJ_BRIDGE')}/activations/${token}`)
+}
+
 const DeactivateUser = (email) => new Promise(async (resolve, reject) => {
   const shouldSend = await ShouldSendEmail(email);
 
@@ -242,7 +255,7 @@ const ConfirmDeactivateUser = (token) => new Promise((resolve, reject) => {
   );
 });
 
-const ResendActivationEmail = (user) => new Promise(async (resolve, reject) => {
+const ResendActivationEmail = async (user) => {
   const shouldSend = await ShouldSendEmail(user);
   if (shouldSend) {
     return resolve(); // noop
@@ -250,13 +263,9 @@ const ResendActivationEmail = (user) => new Promise(async (resolve, reject) => {
 
   SetEmailSended(user);
 
-  axios
-    .post(`${STORJ_BRIDGE}/activations`, {
-      email: user
-    })
-    .then((res) => resolve())
-    .catch(reject);
-});
+  return axios.post(`${process.env.STORJ_BRIDGE}/activations`, { email: user })
+  
+};
 
 const ShouldSendEmail = (email) => new Promise((resolve, reject) => {
   Users.findOne({ where: { email: { [Op.eq]: email } } })
@@ -299,6 +308,8 @@ module.exports = {
   ResetPassword,
   ConfirmResetPassword,
   UpdatePasswordMnemonic,
+  UpdateAccountActivity,
+  ActivateUser,
   DeactivateUser,
   ConfirmDeactivateUser,
   ResendActivationEmail,
