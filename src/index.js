@@ -183,7 +183,7 @@ Server.post('/login', (req, res) => {
    *         description: Wrong username or password
 */
 Server.post('/access', (req, res) => {
-  /*const MAX_LOGIN_FAIL_ATTEMPTS = 3;
+  const MAX_LOGIN_FAIL_ATTEMPTS = 3;
 
   let isTeamActivated = false;
   let rootFolderId = 0;
@@ -198,8 +198,8 @@ Server.post('/access', (req, res) => {
       })
       return;
     }
-    /*
-    Service.Keyserver.keysExists(userData).then(async () => {
+    
+    /*Service.Keyserver.keysExists(userData).then(async () => {
       console.log('ID DEL KEYEXISTS USUARIO', userData.id)
 
     }).catch((err) => {
@@ -210,14 +210,14 @@ Server.post('/access', (req, res) => {
         console.log('No se han podido guardar las claves')
         console.log(err)
       });
-    });
+    });*/
 
 
-    let responseTeam = null;
+    /*let responseTeam = null;
     // Check if user has a team
     await new Promise((resolve, reject) => {
       Service.Team.getTeamByMember(req.body.email).then(async (team) => {
-        console.log("USERTEAM: ", team); //debug
+        console.log("USERTEAM: ", team); //<
         userTeam = team;
         if (team !== undefined) {
           rootFolderId = (await Service.User.FindUserByEmail(team.bridge_user)).root_folder_id;
@@ -243,10 +243,10 @@ Server.post('/access', (req, res) => {
         Logger.error(error.stack);
         reject()
       });
-    })
+    })*/
 
     // Process user data and answer API call
-    const pass = App.services.Crypt.decryptText(req.body.password);
+    const pass = CryptService.decryptText(req.body.password);
 
     // 2-Factor Auth. Verification
     const needsTfa = userData.secret_2FA && userData.secret_2FA.length > 0;
@@ -266,14 +266,14 @@ Server.post('/access', (req, res) => {
     } else if (pass === userData.password.toString() && tfaResult) {
       // Successfull login
       const internxtClient = req.headers['internxt-client'];
-      const token = passport.Sign(
+      const token = AuthService.Sign(
         userData.email,
-        App.config.get('secrets').JWT,
+        process.env.JWT_SECRET,
         internxtClient === 'x-cloud-web' || internxtClient === 'drive-web'
       );
 
-      Service.User.LoginFailed(req.body.email, false);
-      Service.User.UpdateAccountActivity(req.body.email);
+      AuthService.LoginFailed(req.body.email, false);
+      UserService.UpdateAccountActivity(req.body.email);
 
       res.status(200).json({
         user: {
@@ -292,7 +292,7 @@ Server.post('/access', (req, res) => {
     } else {
       // Wrong password
       if (pass !== userData.password.toString()) {
-        Service.User.LoginFailed(req.body.email, true);
+        AuthService.LoginFailed(req.body.email, true);
       }
 
       res.status(400).json({ error: 'Wrong email/password' });
@@ -304,7 +304,7 @@ Server.post('/access', (req, res) => {
       error: 'User not found on Cloud database',
       message: err.message
     });
-  });*/
+  });
 });
 
 
@@ -481,6 +481,13 @@ Server.patch('/password', passportAuth, (req, res) => {
     });
 });*/
 
+Server.get('/activations/:token', (req, res) => {
+  UserService.ActivateUser(req.params.token).then(() => {
+    res.status(200).send();
+  }).catch(err => {
+    res.status(err.response.status).send(err.response.data)
+  })
+})
 
 Server.get('/deactivate', passportAuth, (req, res) => {
   const user = req.user.email;

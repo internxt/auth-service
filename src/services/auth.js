@@ -43,7 +43,7 @@ const LoginFailed = (user, loginFailed) => new Promise((resolve, reject) => {
   Users.update(
     {
       errorLoginCount: loginFailed
-      ? sequelize.literal('error_login_count + 1')
+      ? Sequelize.literal('error_login_count + 1')
       : 0
     },
     { where: { email: user } }
