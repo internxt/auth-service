@@ -19,15 +19,13 @@ function Sign(data, secret, useNewToken = false) {
     const token = useNewToken
       ? jwt.sign(
         {
-          email: data.email,
-          mnemonic: data.mnemonic
+          email: data.email
         },
         secret,
         { expiresIn: '14d' })
       : jwt.sign(
         {
-          email: data.email,
-          mnemonic: data.mnemonic
+          email: data.email
         }, secret);
   
     return token;

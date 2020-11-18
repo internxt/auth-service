@@ -271,23 +271,14 @@ Server.post('/access', (req, res) => {
         process.env.JWT_SECRET,
         internxtClient === 'x-cloud-web' || internxtClient === 'drive-web'
       );
+      const userId = userData.userId;
 
       AuthService.LoginFailed(req.body.email, false);
       UserService.UpdateAccountActivity(req.body.email);
-
+    
       res.status(200).json({
-        user: {
-          userId: userData.userId,
-          mnemonic: userData.mnemonic,
-          root_folder_id: userData.root_folder_id,
-          storeMnemonic: userData.storeMnemonic,
-          name: userData.name,
-          lastname: userData.lastname,
-          uuid: userData.uuid,
-          credit: userData.credit
-        },
-        token,
-        userTeam
+        userId,
+        token
       });
     } else {
       // Wrong password
